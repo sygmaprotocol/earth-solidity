@@ -3,8 +3,11 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./handlers/ERCHandlerHelpers.sol";
 import "./interfaces/IERC20Plus.sol";
+import "./interfaces/ISocialNetworkController.sol";
+
 
 contract NoArgument {
     event NoArgumentCalled();
@@ -235,5 +238,27 @@ contract TestDeposit {
 
     function executeUnpacked(address depositor, uint256 num, address[] memory addresses, bytes memory message) external {
         emit TestExecute(depositor, num, addresses[1], message);
+    }
+}
+
+contract SocialNetworkControllerMock {
+    uint256 public constant HEART_BTC = 369;
+    uint256 public bitcoinStaked = 0;
+    address public _socialNetworkBitcoin;
+
+    event Stake(address indexed user, uint256 amount);
+
+    function setSocialNetworkBitcoinAddress(address socialNetworkBitcoin) public {
+        _socialNetworkBitcoin = socialNetworkBitcoin;
+    }
+
+    function mint(address recipient, uint256 amount) public {
+        IERC20Plus(_socialNetworkBitcoin).mint(recipient, amount);
+    }
+
+    function stakeBTC(uint256 amount, address recipient) external {
+        uint256 mintAmount = amount * HEART_BTC;
+        bitcoinStaked += amount;
+        emit Stake(recipient, mintAmount);
     }
 }
